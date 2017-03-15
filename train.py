@@ -81,13 +81,20 @@ def main():
 	sess = tf.InteractiveSession()
 	tf.initialize_all_variables().run()
 	
+        print "load?"
 	saver = tf.train.Saver()
 	if args.resume_model:
+                print "loading"
 		saver.restore(sess, args.resume_model)
+                print "done loading model"
 	
+        print "load training data"
 	loaded_data = load_training_data(args.data_dir, args.data_set)
+        print "done loading training data"
+
 	
 	for i in range(args.epochs):
+                print "epoch", i
 		batch_no = 0
 		while batch_no*args.batch_size < loaded_data['data_length']:
 			real_images, wrong_images, caption_vectors, z_noise, image_files = get_training_batch(batch_no, args.batch_size, 
@@ -152,8 +159,25 @@ def load_training_data(data_dir, data_set):
 			'image_list' : training_image_list,
 			'captions' : flower_captions,
 			'data_length' : len(training_image_list)
+	        }
+        elif data_set == 'shapes':
+	        h = h5py.File(join(data_dir, 'shapes_tv.hdf5'))
+		shape_captions = {}
+		for ds in h.iteritems():
+			shape_captions[ds[0]] = np.array(ds[1])
+		image_list = [key for key in shape_captions]
+		image_list.sort()
+
+		img_75 = int(len(image_list)*0.75)
+		training_image_list = image_list[0:img_75]
+		random.shuffle(training_image_list)
+		
+		return {
+			'image_list' : training_image_list,
+			'captions' : shape_captions,
+			'data_length' : len(training_image_list)
 		}
-	
+
 	else:
 		with open(join(data_dir, 'meta_train.pkl')) as f:
 			meta_data = pickle.load(f)
@@ -223,6 +247,33 @@ def get_training_batch(batch_no, batch_size, image_size, z_dim,
 			# Improve this selection of wrong image
 			wrong_image_id = random.randint(0,len(loaded_data['image_list'])-1)
 			wrong_image_file =  join(data_dir, 'flowers/jpg/'+loaded_data['image_list'][wrong_image_id])
+			wrong_image_array = image_processing.load_image_array(wrong_image_file, image_size)
+			wrong_images[cnt, :,:,:] = wrong_image_array
+
+			random_caption = random.randint(0,4)
+			captions[cnt,:] = loaded_data['captions'][ loaded_data['image_list'][idx] ][ random_caption ][0:caption_vector_length]
+			image_files.append( image_file )
+			cnt += 1
+
+		z_noise = np.random.uniform(-1, 1, [batch_size, z_dim])
+		return real_images, wrong_images, captions, z_noise, image_files
+	
+        if data_set == 'shapes':
+		real_images = np.zeros((batch_size, 64, 64, 3))
+		wrong_images = np.zeros((batch_size, 64, 64, 3))
+		captions = np.zeros((batch_size, caption_vector_length))
+
+		cnt = 0
+		image_files = []
+		for i in range(batch_no * batch_size, batch_no * batch_size + batch_size):
+			idx = i % len(loaded_data['image_list'])
+			image_file =  join(data_dir, 'shapes/images/'+loaded_data['image_list'][idx])
+			image_array = image_processing.load_image_array(image_file, image_size)
+			real_images[cnt,:,:,:] = image_array
+			
+			# Improve this selection of wrong image
+			wrong_image_id = random.randint(0,len(loaded_data['image_list'])-1)
+			wrong_image_file =  join(data_dir, 'shapes/images/'+loaded_data['image_list'][wrong_image_id])
 			wrong_image_array = image_processing.load_image_array(wrong_image_file, image_size)
 			wrong_images[cnt, :,:,:] = wrong_image_array
 

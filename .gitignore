@@ -1,6 +1,7 @@
 *.swp
 *.swn
 *~
+*.log
 
 
 .DS_Store

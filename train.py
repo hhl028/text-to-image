@@ -11,6 +11,10 @@ import random
 import json
 import os
 import shutil
+import logging
+
+logging.basicConfig(filename='training.log', format='[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S%p', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -92,10 +96,14 @@ def main():
 	loaded_data = load_training_data(args.data_dir, args.data_set)
         print "done loading training data"
 
-	
-	for i in range(args.epochs):
+	logger.info("Starting")
+
+	for i in range(1, args.epochs + 1):
                 print "epoch", i
 		batch_no = 0
+                num_batches = int(len(loaded_data['image_list']) / args.batch_size)
+                total_d_loss = 0
+                total_g_loss = 0
 		while batch_no*args.batch_size < loaded_data['data_length']:
 			real_images, wrong_images, caption_vectors, z_noise, image_files = get_training_batch(batch_no, args.batch_size, 
 				args.image_size, args.z_dim, args.caption_vector_length, 'train', args.data_dir, args.data_set, loaded_data)
@@ -110,10 +118,10 @@ def main():
 					input_tensors['t_z'] : z_noise,
 				})
 			
-			print "d1", d1
-			print "d2", d2
-			print "d3", d3
-			print "D", d_loss
+			#print "d1", d1
+			#print "d2", d2
+			#print "d3", d3
+			#print "D", d_loss
 			
 			# GEN UPDATE
 			_, g_loss, gen = sess.run([g_optim, loss['g_loss'], outputs['generator']],
@@ -133,14 +141,22 @@ def main():
 					input_tensors['t_z'] : z_noise,
 				})
 			
-			print "LOSSES", d_loss, g_loss, batch_no, i, len(loaded_data['image_list'])/ args.batch_size
+			#print "LOSSES", d_loss, g_loss, batch_no, i, len(loaded_data['image_list'])/ args.batch_size
+                        total_d_loss += d_loss
+                        total_g_loss += g_loss
+                        print "epoch {}/{} batch {}/{} - d_loss {} g_loss: {}".format(i, args.epochs, batch_no+1, num_batches, d_loss, g_loss)
+                        #print "d_loss: {}".format(d_loss)
+                        #print "g_loss: {}".format(g_loss)
 			batch_no += 1
 			if (batch_no % args.save_every) == 0:
 				print "Saving Images, Model"
 				save_for_vis(args.data_dir, real_images, gen, image_files)
 				save_path = saver.save(sess, "Data/Models/latest_model_{}_temp.ckpt".format(args.data_set))
 		if i%5 == 0:
-			save_path = saver.save(sess, "Data/Models/model_after_{}_epoch_{}.ckpt".format(args.data_set, i))
+			save_path = saver.save(sess, "Da#ta/Models/model_after_{}_epoch_{}.ckpt".format(args.data_set, i))
+                total_d_loss /= num_batches
+                total_g_loss /= num_batches
+                logger.info('epoch {} d_loss {} g_loss {}'.format(i, total_d_loss, total_g_loss))
 
 def load_training_data(data_dir, data_set):
 	if data_set == 'flowers':

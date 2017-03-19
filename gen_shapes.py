@@ -86,7 +86,7 @@ def main():
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
     ctx = cairo.Context(surface)
 
-    for i in range(4056):
+    for i in range(4096):
         shape_col, shape_rgb, bg_col, bg_rgb = select_colors()
         #print(shape_col, shape_rgb, bg_col, bg_rgb)
 

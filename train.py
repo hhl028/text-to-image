@@ -102,6 +102,7 @@ def main():
                 print "epoch", i
 		batch_no = 0
                 num_batches = int(len(loaded_data['image_list']) / args.batch_size)
+                print len(loaded_data['image_list'])
                 total_d_loss = 0
                 total_g_loss = 0
 		while batch_no*args.batch_size < loaded_data['data_length']:
@@ -182,8 +183,8 @@ def main():
                         fp += batch_fp
                         batch_no += 1
 
-                    tp /= num_batches 
-                    fp /= num_batches 
+                    tp /= num_batches + 1
+                    fp /= num_batches + 1
                     print "Test Metrics:", tp, fp
                     logger.info('epoch {} true_positive {} false_positive {}'.format(i, tp, fp))
 

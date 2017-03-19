@@ -78,8 +78,10 @@ class GAN:
 			'd_loss2': d_loss2,
 			'd_loss3' : d_loss3,
 			'disc_real_image_logits' : disc_real_image_logits,
-			'disc_wrong_image_logits' : disc_wrong_image,
-			'disc_fake_image_logits' : disc_fake_image_logits
+			'disc_wrong_image_logits' : disc_wrong_image_logits,
+			'disc_fake_image_logits' : disc_fake_image_logits,
+         'disc_real_image': disc_real_image,
+         'disc_fake_image': disc_fake_image
 		}
 		
 		return input_tensors, variables, loss, outputs, checks

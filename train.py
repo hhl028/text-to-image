@@ -93,7 +93,7 @@ def main():
                 print "done loading model"
 	
         print "load training data"
-	loaded_data = load_training_data(args.data_dir, args.data_set)
+	loaded_data, test_data = load_training_data(args.data_dir, args.data_set)
         print "done loading training data"
 
 	logger.info("Starting")
@@ -153,10 +153,40 @@ def main():
 				save_for_vis(args.data_dir, real_images, gen, image_files)
 				save_path = saver.save(sess, "Data/Models/latest_model_{}_temp.ckpt".format(args.data_set))
 		if i%5 == 0:
-			save_path = saver.save(sess, "Da#ta/Models/model_after_{}_epoch_{}.ckpt".format(args.data_set, i))
+			save_path = saver.save(sess, "Data/Models/model_after_{}_epoch_{}.ckpt".format(args.data_set, i))
                 total_d_loss /= num_batches
                 total_g_loss /= num_batches
                 logger.info('epoch {} d_loss {} g_loss {}'.format(i, total_d_loss, total_g_loss))
+
+                if i % 1 == 0:
+                    print "testing"
+                    batch_no = 0
+                    num_batches = int(len(test_data['image_list']) / args.batch_size)
+                    tp = 0
+                    fp = 0
+		    while batch_no*args.batch_size < test_data['data_length']:
+                        real_images, caption_vectors, z_noise = get_test_batch(batch_no, args.batch_size, args.image_size, args.z_dim,
+                                args.caption_vector_length, args.data_dir, args.data_set, test_data) 
+
+                        true_pos = tf.reduce_mean(checks['disc_real_image'])
+                        false_pos = tf.reduce_mean(checks['disc_fake_image'])
+                        batch_tp, batch_fp = sess.run([true_pos, false_pos],
+                                feed_dict = {
+                                        input_tensors['t_real_image']: real_images,
+                                        input_tensors['t_real_caption']: caption_vectors,
+                                        input_tensors['t_z']: z_noise, 
+                                }
+                        )
+                        print "Test batch ", batch_no, "tp:", batch_tp, "fp:", batch_fp
+                        tp += batch_tp
+                        fp += batch_fp
+                        batch_no += 1
+
+                    tp /= num_batches 
+                    fp /= num_batches 
+                    print "Test Metrics:", tp, fp
+                    logger.info('epoch {} true_positive {} false_positive {}'.format(i, tp, fp))
+
 
 def load_training_data(data_dir, data_set):
 	if data_set == 'flowers':
@@ -170,12 +200,15 @@ def load_training_data(data_dir, data_set):
 		img_75 = int(len(image_list)*0.75)
 		training_image_list = image_list[0:img_75]
 		random.shuffle(training_image_list)
+
+                test_image_list = image_list[img_75]
 		
 		return {
 			'image_list' : training_image_list,
 			'captions' : flower_captions,
 			'data_length' : len(training_image_list)
 	        }
+
         elif data_set == 'shapes':
 	        h = h5py.File(join(data_dir, 'shapes_tv.hdf5'))
 		shape_captions = {}
@@ -187,12 +220,22 @@ def load_training_data(data_dir, data_set):
 		img_75 = int(len(image_list)*0.75)
 		training_image_list = image_list[0:img_75]
 		random.shuffle(training_image_list)
+
+                test_image_list = image_list[img_75:]
 		
-		return {
+                training_set = {
 			'image_list' : training_image_list,
 			'captions' : shape_captions,
 			'data_length' : len(training_image_list)
-		}
+	        }
+
+                test_set = {
+                        'image_list': test_image_list,
+                        'captions': shape_captions,
+                        'data_length': len(test_image_list)
+                }
+
+                return training_set, test_set
 
 	else:
 		with open(join(data_dir, 'meta_train.pkl')) as f:
@@ -300,6 +343,39 @@ def get_training_batch(batch_no, batch_size, image_size, z_dim,
 
 		z_noise = np.random.uniform(-1, 1, [batch_size, z_dim])
 		return real_images, wrong_images, captions, z_noise, image_files
+
+
+def get_test_batch(batch_no, batch_size, image_size, z_dim, 
+	caption_vector_length, data_dir, data_set, loaded_data = None):
+	
+        if data_set == 'shapes':
+		real_images = np.zeros((batch_size, 64, 64, 3))
+		#wrong_images = np.zeros((batch_size, 64, 64, 3))
+		captions = np.zeros((batch_size, caption_vector_length))
+
+		cnt = 0
+		#image_files = []
+		for i in range(batch_no * batch_size, batch_no * batch_size + batch_size):
+		#for i in range(num_images):
+			idx = i % len(loaded_data['image_list'])
+			image_file =  join(data_dir, 'shapes/images/'+loaded_data['image_list'][idx])
+			image_array = image_processing.load_image_array(image_file, image_size)
+			real_images[cnt,:,:,:] = image_array
+			
+			# Improve this selection of wrong image
+			#wrong_image_id = random.randint(0,len(loaded_data['image_list'])-1)
+			#wrong_image_file =  join(data_dir, 'shapes/images/'+loaded_data['image_list'][wrong_image_id])
+			#wrong_image_array = image_processing.load_image_array(wrong_image_file, image_size)
+			#wrong_images[cnt, :,:,:] = wrong_image_array
+
+			random_caption = random.randint(0,4)
+			captions[cnt,:] = loaded_data['captions'][ loaded_data['image_list'][idx] ][ random_caption ][0:caption_vector_length]
+			#image_files.append( image_file )
+			cnt += 1
+
+		z_noise = np.random.uniform(-1, 1, [batch_size, z_dim])
+		return real_images, captions, z_noise
+
 
 if __name__ == '__main__':
 	main()

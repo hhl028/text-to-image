@@ -1,3 +1,8 @@
+*.swp
+*.swn
+*~
+
+
 .DS_Store
 .idea*
 *.pdf

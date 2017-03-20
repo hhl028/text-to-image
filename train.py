@@ -106,6 +106,7 @@ def main():
                 total_d_loss = 0
                 total_g_loss = 0
 		while batch_no*args.batch_size < loaded_data['data_length']:
+		#while batch_no < 2:
 			real_images, wrong_images, caption_vectors, z_noise, image_files = get_training_batch(batch_no, args.batch_size, 
 				args.image_size, args.z_dim, args.caption_vector_length, 'train', args.data_dir, args.data_set, loaded_data)
 			
@@ -178,13 +179,13 @@ def main():
                                         input_tensors['t_z']: z_noise, 
                                 }
                         )
-                        print "Test batch ", batch_no, "tp:", batch_tp, "fp:", batch_fp
+                        print "Test batch {}/{}".format(batch_no+1, num_batches), "tp:", batch_tp, "fp:", batch_fp
                         tp += batch_tp
                         fp += batch_fp
                         batch_no += 1
 
-                    tp /= num_batches + 1
-                    fp /= num_batches + 1
+                    tp /= num_batches
+                    fp /= num_batches
                     print "Test Metrics:", tp, fp
                     logger.info('epoch {} true_positive {} false_positive {}'.format(i, tp, fp))
 

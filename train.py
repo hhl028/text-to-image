@@ -170,8 +170,8 @@ def main():
                         real_images, caption_vectors, z_noise = get_test_batch(batch_no, args.batch_size, args.image_size, args.z_dim,
                                 args.caption_vector_length, args.data_dir, args.data_set, test_data) 
 
-                        true_pos = tf.reduce_mean(checks['disc_real_image'])
-                        false_pos = tf.reduce_mean(checks['disc_fake_image'])
+                        true_pos = tf.reduce_mean(tf.round(checks['disc_real_image']))
+                        false_pos = tf.reduce_mean(tf.round(checks['disc_fake_image']))
                         batch_tp, batch_fp = sess.run([true_pos, false_pos],
                                 feed_dict = {
                                         input_tensors['t_real_image']: real_images,

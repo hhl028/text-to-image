@@ -40,26 +40,6 @@ class GAN:
 		disc_wrong_image, disc_wrong_image_logits   = self.discriminator(t_wrong_image, t_real_caption, reuse = True)
 		disc_fake_image, disc_fake_image_logits   = self.discriminator(fake_image, t_real_caption, reuse = True)
 
-		for i in len(disc_real_image_logits):
-			if disc_real_image_logits[i] >= 0.5:
-				disc_real_image_logits[i] = 1
-			else:
-				disc_real_image_logits[i] = 0
-		
-		for i in len(disc_wrong_image_logits):
-			if disc_wrong_image_logits[i] >= 0.5:
-				disc_wrong_image_logits[i] = 1
-			else:
-				disc_wrong_image_logits[i] = 0
-			
-		for i in len(disc_fake_image_logits):
-			if disc_fake_image_logits[i] >= 0.5:
-				disc_fake_image_logits[i] = 1
-			else:
-				disc_fake_image_logits[i] = 0
-			
-			
-		
 		g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(disc_fake_image_logits, tf.ones_like(disc_fake_image)))
 		
 		d_loss1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(disc_real_image_logits, tf.ones_like(disc_real_image)))

@@ -86,7 +86,7 @@ def main():
 	tf.initialize_all_variables().run()
 	
         print "load?"
-	saver = tf.train.Saver()
+	saver = tf.train.Saver(max_to_keep=None)
 	if args.resume_model:
                 print "loading"
 		saver.restore(sess, args.resume_model)
@@ -154,7 +154,7 @@ def main():
 				print "Saving Images, Model"
 				save_for_vis(args.data_dir, real_images, gen, image_files)
 				save_path = saver.save(sess, "Data/Models/latest_model_{}_temp.ckpt".format(args.data_set))
-		if i%5 == 0:
+		if i%10 == 0:
 			save_path = saver.save(sess, "Data/Models/model_after_{}_epoch_{}.ckpt".format(args.data_set, i))
                 total_d_loss /= num_batches
                 total_g_loss /= num_batches

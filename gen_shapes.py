@@ -86,6 +86,7 @@ def main():
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH, HEIGHT)
     ctx = cairo.Context(surface)
 
+    num_generated = 0;
     for i in range(4096):
         shape_col, shape_rgb, bg_col, bg_rgb = select_colors()
         #print(shape_col, shape_rgb, bg_col, bg_rgb)
@@ -100,14 +101,22 @@ def main():
 
         file_name = '{:05d}'.format(i)
         
-        surface.write_to_png('{}/{}.png'.format(image_path, file_name))
+        if not withhold(shape, shape_col, bg_col):
+            surface.write_to_png('{}/{}.png'.format(image_path, file_name))
 
-        # generate text descriptions
-        gen_descriptions(file_name, shape_col, bg_col, shape)
+            # generate text descriptions
+            gen_descriptions(file_name, shape_col, bg_col, shape)
+
+            num_generated += 1
+
+    print("generated", num_generated, "images")
 
         
 
-        
+def withhold(shape, shape_col, bg_col):
+    if shape_col == 'blue' and bg_col == 'red':
+        return True
+    return False
 
 
 # Returns color, rgb, color, rgb

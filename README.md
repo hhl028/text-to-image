@@ -2,6 +2,8 @@
 
 [![Join the chat at https://gitter.im/text-to-image/Lobby](https://badges.gitter.im/text-to-image/Lobby.svg)](https://gitter.im/text-to-image/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+Modified to generate shapes for COGS 181
+
 This is an experimental tensorflow implementation of synthesizing images from captions using [Skip Thought Vectors][1]. The images are synthesized using the GAN-CLS Algorithm from the paper [Generative Adversarial Text-to-Image Synthesis][2]. This implementation is built on top of the excellent [DCGAN in Tensorflow][3]. The following is the model architecture. The blue bars represent the Skip Thought Vectors for the captions.
 
 ![Model architecture](http://i.imgur.com/dNl2HkZ.jpg)
@@ -10,25 +12,29 @@ Image Source : [Generative Adversarial Text-to-Image Synthesis][2] Paper
 
 ## Requirements
 - Python 2.7.6
-- [Tensorflow][4]
+- [Tensorflow][4] 0.10
 - [h5py][5]
 - [Theano][6] : for skip thought vectors
 - [scikit-learn][7] : for skip thought vectors
 - [NLTK][8] : for skip thought vectors
 
 ## Datasets
-- All the steps below for downloading the datasets and models can be performed automatically by running `python download_datasets.py`. Several gigabytes of files will be downloaded and extracted.
-- The model is currently trained on the [flowers dataset][9]. Download the images from [this link][9] and save them in ```Data/flowers/jpg```. Also download the captions from [this link][10]. Extract the archive, copy the ```text_c10``` folder and paste it in ```Data/flowers```.
-- Download the pretrained models and vocabulary for skip thought vectors as per the instructions given [here][13]. Save the downloaded files in ```Data/skipthoughts```.
+- All the steps below for downloading the datasets and models can be performed automatically by running `python download_datasets.py`. Several gigabytes of files will be downloaded and extracted. (broken?)
+- The model is currently trained on the [flowers dataset][9]. Download the images from [this link][9] and save them in ```Data/flowers/jpg```. Also download the captions from [this link][10]. Extract the archive, copy the ```text_c10``` folder and paste it in ```Data/flowers```. (not required)
+- Download the pretrained models and vocabulary for skip thought vectors as per the instructions given [here][13]. Save the downloaded files in ```Data/skipthoughts```. (required)
 - Make empty directories in Data, ```Data/samples```,  ```Data/val_samples``` and ```Data/Models```. They will be used for sampling the generated images and saving the trained models.
 
 ## Usage
+- <b>Data Set Generation</b>: Generate the shapes data set using:
+```
+python3 gen_shapes.py
+```
 - <b>Data Processing</b> : Extract the skip thought vectors for the flowers data set using :
 ```
-python data_loader.py --data_set="flowers"
+python data_loader.py --data_set="shapes"
 ```
 - <b>Training</b>
-  * Basic usage `python train.py --data_set="flowers"`
+  * Basic usage `python train.py --data_set="shapes"`
   * Options
       - `z_dim`: Noise Dimension. Default is 100.
       - `t_dim`: Text feature dimension. Default is 256.

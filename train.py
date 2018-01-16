@@ -238,7 +238,6 @@ def load_training_data(data_dir, data_set):
         }
 
         return training_set, test_set
-
     elif data_set == 'flickr':
     	h = h5py.File(join(data_dir, 'flickr_tv.hdf5'))
 

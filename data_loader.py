@@ -173,7 +173,7 @@ def main():
 	
 	if args.data_set == 'flowers':
 		save_caption_vectors_flowers(args.data_dir)
-    elif args.data_set == 'shapes':
+	elif args.data_set == 'shapes':
 		save_caption_vectors_shapes(args.data_dir)
 	elif args.data_set == 'flickr':
 		save_caption_vectors_flickr(args.data_dir)

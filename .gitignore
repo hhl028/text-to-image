@@ -14,6 +14,7 @@
 sample.py
 vggtest.py
 *.pem
+nohup.out
 amazon_ssh.sh
 awstransfer.sh
 localtrain.py

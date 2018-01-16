@@ -111,7 +111,7 @@ class GAN:
 		s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
 		
 		reduced_text_embedding = ops.lrelu( ops.linear(t_text_embedding, self.options['t_dim'], 'g_embedding') )
-		z_concat = tf.concat([t_z, reduced_text_embedding],1)
+		z_concat = tf.concat(1, [t_z, reduced_text_embedding])
 		z_ = ops.linear(z_concat, self.options['gf_dim']*8*s16*s16, 'g_h0_lin')
 		h0 = tf.reshape(z_, [-1, s16, s16, self.options['gf_dim'] * 8])
 		h0 = tf.nn.relu(self.g_bn0(h0, train = False))
@@ -136,7 +136,7 @@ class GAN:
 		s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
 		
 		reduced_text_embedding = ops.lrelu( ops.linear(t_text_embedding, self.options['t_dim'], 'g_embedding') )
-		z_concat = tf.concat([t_z, reduced_text_embedding],1)
+		z_concat = tf.concat(1, [t_z, reduced_text_embedding])
 		z_ = ops.linear(z_concat, self.options['gf_dim']*8*s16*s16, 'g_h0_lin')
 		h0 = tf.reshape(z_, [-1, s16, s16, self.options['gf_dim'] * 8])
 		h0 = tf.nn.relu(self.g_bn0(h0))
@@ -157,7 +157,6 @@ class GAN:
 	# DISCRIMINATOR IMPLEMENTATION based on : https://github.com/carpedm20/DCGAN-tensorflow/blob/master/model.py
 	def discriminator(self, image, t_text_embedding, reuse=False):
 		if reuse:
-			print("VARIABLES REUSED \n\n\n\n\n")
 			tf.get_variable_scope().reuse_variables()
 
 		h0 = ops.lrelu(ops.conv2d(image, self.options['df_dim'], name = 'd_h0_conv')) #32
@@ -171,7 +170,7 @@ class GAN:
 		reduced_text_embeddings = tf.expand_dims(reduced_text_embeddings,2)
 		tiled_embeddings = tf.tile(reduced_text_embeddings, [1,4,4,1], name='tiled_embeddings')
 		
-		h3_concat = tf.concat([h3, tiled_embeddings], 3, name='h3_concat')
+		h3_concat = tf.concat( 3, [h3, tiled_embeddings], name='h3_concat')
 		h3_new = ops.lrelu( self.d_bn4(ops.conv2d(h3_concat, self.options['df_dim']*8, 1,1,1,1, name = 'd_h3_conv_new'))) #4
 		
 		h4 = ops.linear(tf.reshape(h3_new, [self.options['batch_size'], -1]), 1, 'd_h3_lin')

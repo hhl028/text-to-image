@@ -148,10 +148,7 @@ def save_caption_vectors_flickr(data_dir):
 	encoded_captions = {}
 
 	for label, text in img_to_text.items():
-		st = time.time()
-		encoded_captions[img] = skipthoughts.encode(model, text)
-		print i, len(image_captions), img
-		print "Seconds", time.time() - st
+		encoded_captions[label] = skipthoughts.encode(model, text)
 		
 	
 	h = h5py.File(join(data_dir, 'flickr_tv.hdf5'))

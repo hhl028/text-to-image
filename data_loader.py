@@ -124,6 +124,40 @@ def save_caption_vectors_shapes(data_dir):
 	for key in encoded_captions:
 		h.create_dataset(key, data=encoded_captions[key])
 	h.close()
+
+def save_caption_vectors_flickr(data_dir):
+	import time
+	
+	img_dir = join(data_dir, 'cropped_images')
+	image_files = [f for f in os.listdir(img_dir)]
+	image_captions = { img_file : [] for img_file in image_files }
+
+	# # read the labels into some data structure
+	img_to_text = {}
+	with open("image_labels.txt", 'r') as file:
+	    i = 0
+	    for line in file:
+	        tmp = line.split("|")
+	        label = '_'.join(tmp[:2])
+	        img_to_text[label] = tmp[2:]
+	        if i % 25000 == 0:
+	            print("Finished iteration %d" % (i))
+	        i += 1
+
+	model = skipthoughts.load_model()
+	encoded_captions = {}
+
+	for label, text in img_to_text.items():
+		st = time.time()
+		encoded_captions[img] = skipthoughts.encode(model, text)
+		print i, len(image_captions), img
+		print "Seconds", time.time() - st
+		
+	
+	h = h5py.File(join(data_dir, 'flickr_tv.hdf5'))
+	for key in encoded_captions:
+		h.create_dataset(key, data=encoded_captions[key])
+	h.close()
 			
 def main():
 	parser = argparse.ArgumentParser()
@@ -139,8 +173,10 @@ def main():
 	
 	if args.data_set == 'flowers':
 		save_caption_vectors_flowers(args.data_dir)
-        elif args.data_set == 'shapes':
+    elif args.data_set == 'shapes':
 		save_caption_vectors_shapes(args.data_dir)
+	elif args.data_set == 'flickr':
+		save_caption_vectors_flickr(args.data_dir)
 	else:
 		save_caption_vectors_ms_coco(args.data_dir, args.split, args.batch_size)
 

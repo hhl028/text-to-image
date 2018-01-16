@@ -157,6 +157,7 @@ class GAN:
 	# DISCRIMINATOR IMPLEMENTATION based on : https://github.com/carpedm20/DCGAN-tensorflow/blob/master/model.py
 	def discriminator(self, image, t_text_embedding, reuse=False):
 		if reuse:
+			print("VARIABLES REUSED \n\n\n\n\n")
 			tf.get_variable_scope().reuse_variables()
 
 		h0 = ops.lrelu(ops.conv2d(image, self.options['df_dim'], name = 'd_h0_conv')) #32

@@ -128,13 +128,13 @@ def save_caption_vectors_shapes(data_dir):
 def save_caption_vectors_flickr(data_dir):
 	import time
 	
-	img_dir = join(data_dir, 'cropped_images')
+	img_dir = join('/home/hhl028/WINNtranslation/flickr', 'cropped_images')
 	image_files = [f for f in os.listdir(img_dir)]
 	image_captions = { img_file : [] for img_file in image_files }
 
 	# # read the labels into some data structure
 	img_to_text = {}
-	with open("image_labels.txt", 'r') as file:
+	with open("/home/hhl028/WINNtranslation/flickr/image_labels.txt", 'r') as file:
 	    i = 0
 	    for line in file:
 	        tmp = line.split("|")

@@ -211,8 +211,8 @@ def load_training_data(data_dir, data_set):
 			'data_length' : len(training_image_list)
 	        }
 
-    elif data_set == 'shapes':
-	        h = h5py.File(join(data_dir, 'shapes_tv.hdf5'))
+	elif data_set == 'shapes':
+		h = h5py.File(join(data_dir, 'shapes_tv.hdf5'))
 		shape_captions = {}
 		for ds in h.iteritems():
 			shape_captions[ds[0]] = np.array(ds[1])
@@ -223,25 +223,25 @@ def load_training_data(data_dir, data_set):
 		training_image_list = image_list[0:img_75]
 		random.shuffle(training_image_list)
 
-                test_image_list = image_list[img_75:]
-		
-                training_set = {
-			'image_list' : training_image_list,
-			'captions' : shape_captions,
-			'data_length' : len(training_image_list)
-	        }
+        test_image_list = image_list[img_75:]
 
-                test_set = {
-                        'image_list': test_image_list,
-                        'captions': shape_captions,
-                        'data_length': len(test_image_list)
-                }
+        training_set = {
+		'image_list' : training_image_list,
+		'captions' : shape_captions,
+		'data_length' : len(training_image_list)
+	    }
 
-                return training_set, test_set
+        test_set = {
+                'image_list': test_image_list,
+                'captions': shape_captions,
+                'data_length': len(test_image_list)
+        }
+
+        return training_set, test_set
 
     elif data_set == 'flickr':
     	h = h5py.File(join(data_dir, 'flickr_tv.hdf5'))
-    	
+
 		shape_captions = {}
 		for ds in h.iteritems():
 			shape_captions[ds[0]] = np.array(ds[1])

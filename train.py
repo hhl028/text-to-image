@@ -88,14 +88,15 @@ def main():
         print "load?"
 	saver = tf.train.Saver(max_to_keep=None)
 	if args.resume_model:
-                print "loading"
+		print "loading"
 		saver.restore(sess, args.resume_model)
-                print "done loading model"
+		print "done loading model"
 	
-        print "load training data"
+	print "load training data"
 	loaded_data, test_data = load_training_data(args.data_dir, args.data_set)
-        print "done loading training data"
-
+	print "done loading training data"
+	print(args.data_dir)
+	print(args.data_set)
 	logger.info("Starting")
 
 	for i in range(1, args.epochs + 1):
@@ -201,12 +202,12 @@ def load_training_data(data_dir, data_set):
 		img_75 = int(len(image_list)*0.75)
 		training_image_list = image_list[0:img_75]
 		random.shuffle(training_image_list)
-        test_image_list = image_list[img_75]
-        return {
+		test_image_list = image_list[img_75]
+		return {
 			'image_list' : training_image_list,
 			'captions' : flower_captions,
 			'data_length' : len(training_image_list)
-        }
+		}
 
 	if data_set == 'shapes':
 		h = h5py.File(join(data_dir, 'shapes_tv.hdf5'))
@@ -218,18 +219,18 @@ def load_training_data(data_dir, data_set):
 		img_75 = int(len(image_list)*0.75)
 		training_image_list = image_list[0:img_75]
 		random.shuffle(training_image_list)
-        test_image_list = image_list[img_75:]
-        training_set = {
+		test_image_list = image_list[img_75:]
+		training_set = {
 		'image_list' : training_image_list,
 		'captions' : shape_captions,
 		'data_length' : len(training_image_list)
-	    }
-        test_set = {
-                'image_list': test_image_list,
-                'captions': shape_captions,
-                'data_length': len(test_image_list)
-        }
-        return training_set, test_set
+		}
+		test_set = {
+		        'image_list': test_image_list,
+		        'captions': shape_captions,
+		        'data_length': len(test_image_list)
+		}
+		return training_set, test_set
 
 	if data_set == 'flickr':
 		h = h5py.File(join(data_dir, 'flickr_tv.hdf5'))

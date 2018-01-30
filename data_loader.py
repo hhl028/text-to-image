@@ -128,6 +128,7 @@ def save_caption_vectors_shapes(data_dir):
 def save_caption_vectors_flickr(data_dir):
 	import time
 	
+	print("BEGIN LOADING FLICKR")
 	img_dir = join('/home/hhl028/WINNtranslation/flickr', 'cropped_images')
 	image_files = [f for f in os.listdir(img_dir)]
 	image_captions = { img_file : [] for img_file in image_files }
@@ -150,11 +151,13 @@ def save_caption_vectors_flickr(data_dir):
 	for label, text in img_to_text.items():
 		encoded_captions[label] = skipthoughts.encode(model, text)
 		
-	
+	print("END ENCODING")
+
 	h = h5py.File(join(data_dir, 'flickr_tv.hdf5'))
 	for key in encoded_captions:
 		h.create_dataset(key, data=encoded_captions[key])
 	h.close()
+	print("DONE WRITING H5PY")
 			
 def main():
 	parser = argparse.ArgumentParser()

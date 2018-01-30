@@ -130,8 +130,25 @@ def save_caption_vectors_flickr(data_dir):
 	
 	print("BEGIN LOADING FLICKR")
 	img_dir = join('/home/hhl028/WINNtranslation/flickr', 'cropped_images')
-	image_files = [f for f in os.listdir(img_dir)]
-	image_captions = { img_file : [] for img_file in image_files }
+
+	def get_images_path_in_directory(path):
+	    '''
+	    Get path of all images recursively in directory filtered by extension list.
+	        path: Path of directory contains images.
+	    Return path of images in selected directory.
+	    '''
+	    images_path_in_directory = []
+	    image_extensions = ['.png', '.jpg']
+	    
+	    for root_path, directory_names, file_names in os.walk(path):
+	        for file_name in file_names:
+	            lower_file_name = file_name.lower()
+	            if any(map(lambda image_extension: 
+	                       lower_file_name.endswith(image_extension), 
+	                       image_extensions)):
+	                images_path_in_directory.append(os.path.join(root_path, file_name))
+
+	    return images_path_in_directory
 
 	# # read the labels into some data structure
 	img_to_text = {}
@@ -145,10 +162,61 @@ def save_caption_vectors_flickr(data_dir):
 	            print("Finished iteration %d" % (i))
 	        i += 1
 
+	def remove_invalid_paths(pos_all_images_path, img_to_text):
+	    '''
+	    Some images don't have text. Don't use those.
+	    '''
+	    res = []
+	    for path in pos_all_images_path:
+	        # get image name from path
+	        img_name = path.split('/')[-1].replace('.png','').replace('.jpg','')
+	        label = '_'.join((img_name).split("_")[:2])
+	        # don't use image unless we have phrases for it
+	        if label in img_to_text:
+	            res.append(path)
+	    return res
+
+	# remove images with invalid paths
+	image_files = remove_invalid_paths(image_files, img_to_text)
+	image_captions = { img_file : [] for img_file in image_files }
+
+	# remove images without one of the target terms in it 
+	def get_image_texts(pos_all_images_path, target_phrases, img_to_text):
+	    '''
+	    Given a list of positive ground truth images/text, return two lists, 
+	    one of image paths and one of texts.
+	    
+	    At least one of the phrases for the given image must contain the 
+	    target text.
+	    '''
+	    return_labels = []
+	    return_texts = []
+	    for image_path in pos_all_images_path:
+	        img_name = image_path.split('/')[-1].replace('.png','').replace('.jpg','')
+	        label = '_'.join((img_name).split("_")[:2])
+	        for phrase in img_to_text[label]:
+	            for target_phrase in target_phrases:
+	                if target_phrase in phrase + '\n':
+	                    return_labels.append(label)
+	                    return_texts.append(phrase.strip())
+	    return zip(return_labels, return_texts)
+
+	# class 1: man
+	target_phrases = [' man\n']
+    label_text_1 = get_image_texts(pos_all_images_paths_all, target_phrases, img_to_text)
+    label_text_1 = label_text_1[:len(pos_all_images_text_1)/4]
+
+    # class 2: dog
+    target_phrases = ['dog\n']
+    label_text_2 = get_image_texts(pos_all_images_paths_all, target_phrases, img_to_text)
+
+    # combine classes
+    label_text_all = label_text_1 + label_text_2
+
 	model = skipthoughts.load_model()
 	encoded_captions = {}
 
-	for label, text in img_to_text.items():
+	for label, text in label_text_all:
 		encoded_captions[label] = skipthoughts.encode(model, text)
 		
 	print("END ENCODING")
